@@ -153,7 +153,7 @@ def train_xgb_model(dfs: List[pd.DataFrame]):
         logger.warning("No data available to train XGB model.")
         return None
     try:
-        import xgboost as xgb  # type: ignore
+        import xgboost as xgb 
 
         model = xgb.XGBClassifier(**XGB_PARAMS)
         model.fit(X, y)
@@ -161,7 +161,7 @@ def train_xgb_model(dfs: List[pd.DataFrame]):
     except Exception as exc:
         logger.warning("XGBoost unavailable, falling back to sklearn or simple model: %s", exc)
     try:
-        from sklearn.ensemble import GradientBoostingClassifier  # type: ignore
+        from sklearn.ensemble import GradientBoostingClassifier 
 
         model = GradientBoostingClassifier()
         model.fit(X, y)

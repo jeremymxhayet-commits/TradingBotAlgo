@@ -66,17 +66,17 @@ def _load_training_data(start_date: str, end_date: str) -> pd.DataFrame:
 
 def train_rl_agent(start_date: str, end_date: str):
     try:
-        import gymnasium  # type: ignore
+        import gymnasium  
     except Exception:
         try:
-            import gym  # type: ignore  # noqa: F401
+            import gym  
         except Exception as exc:
             logger.error("gymnasium (or gym) is required for RL training: %s", exc)
             logger.error("Install with: pip install gymnasium")
             return None
     try:
-        from stable_baselines3 import PPO  # type: ignore
-        from stable_baselines3.common.vec_env import DummyVecEnv  # type: ignore
+        from stable_baselines3 import PPO 
+        from stable_baselines3.common.vec_env import DummyVecEnv 
     except Exception as exc:
         logger.error("stable_baselines3 is required for RL training: %s", exc)
         return None

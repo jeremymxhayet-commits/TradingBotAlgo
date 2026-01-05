@@ -1,6 +1,7 @@
 print(">>> Backtest script starting...")
 import os
 import logging
+import time
 from datetime import datetime
 
 from config import (
@@ -93,6 +94,7 @@ def _load_or_fetch_symbol(fetcher, symbol, start, end, interval, asset_type=None
 
 
 def run_backtest(strategy_name="ml", start_date=None, end_date=None, tag=None):
+    start_time = time.monotonic()
     logger.info("=== Starting Backtest: %s Strategy ===", strategy_name.upper())
 
     symbol_asset_map = {}
@@ -246,7 +248,10 @@ def run_backtest(strategy_name="ml", start_date=None, end_date=None, tag=None):
         tag=f"{strategy_name}{tag_suffix}",
     )
 
-    logger.info("Backtest complete.")
+    elapsed = int(time.monotonic() - start_time)
+    minutes, seconds = divmod(elapsed, 60)
+    hours, minutes = divmod(minutes, 60)
+    logger.info("Backtest complete in %02d:%02d:%02d.", hours, minutes, seconds)
 
 
 def run_train_validate_test(

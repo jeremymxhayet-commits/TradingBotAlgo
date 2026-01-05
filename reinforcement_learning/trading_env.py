@@ -3,8 +3,8 @@ import pandas as pd
 
 try:
     import gymnasium as gym
-except Exception:  # pragma: no cover - fallback when gymnasium is missing
-    import gym  # type: ignore
+except Exception:  
+    import gym 
 
 
 class TradingEnv(gym.Env):

@@ -16,7 +16,7 @@ try:
     import alpaca_trade_api as tradeapi
 except ImportError:
     raise ImportError("Please install alpaca-trade-api with `pip install alpaca-trade-api`")
-
+   
 
 
 logging.basicConfig(level=logging.INFO)

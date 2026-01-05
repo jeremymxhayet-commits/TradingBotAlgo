@@ -1,4 +1,5 @@
 import logging
+import time
 
 import pandas as pd
 
@@ -143,6 +144,7 @@ class Backtester:
                             "buy_price": fill_price,
                             "sell_price": prev_cost if prev_cost else None,
                             "pnl": (prev_cost - fill_price) * cover_qty if prev_cost else None,
+                            "cash_after": self.cash,
                         }
                     )
                     continue
@@ -202,10 +204,14 @@ class Backtester:
                     "buy_price": buy_price,
                     "sell_price": sell_price,
                     "pnl": pnl,
+                    "cash_after": self.cash,
                 }
             )
 
         self.trades.extend(executed_trades)
+        if executed_trades:
+            self.strategy.cash = self.cash
+            self.strategy.positions = dict(self.positions)
         return executed_trades
 
     def _mark_to_market(self, current_data, current_time):
@@ -269,14 +275,18 @@ class Backtester:
                         orders.append({"symbol": symbol, "side": "buy", "qty": abs_qty, "order_type": "market"})
         return orders
 
-    def run(self):
+    def run(self, progress_interval_s=10):
         datetime_index = self._build_datetime_index()
         if not datetime_index:
             raise RuntimeError("No timestamps available for backtest.")
         if self.align_prices:
             self._align_price_data(datetime_index)
 
-        for current_time in datetime_index:
+        total_steps = len(datetime_index)
+        start_time = time.monotonic()
+        last_progress = start_time
+
+        for step, current_time in enumerate(datetime_index, start=1):
             current_data = {}
             data_slice = {}
 
@@ -308,6 +318,21 @@ class Backtester:
             if not self.risk_manager.check_drawdown(portfolio_value):
                 logger.warning("Max drawdown exceeded. Halting backtest.")
                 break
+
+            now = time.monotonic()
+            if progress_interval_s and (now - last_progress) >= progress_interval_s:
+                elapsed = int(now - start_time)
+                minutes, seconds = divmod(elapsed, 60)
+                hours, minutes = divmod(minutes, 60)
+                logger.info(
+                    "Backtest progress: %.1f%% | elapsed %02d:%02d:%02d | current=%s",
+                    (step / total_steps) * 100.0,
+                    hours,
+                    minutes,
+                    seconds,
+                    current_time,
+                )
+                last_progress = now
 
         equity_df = pd.DataFrame(self.equity_curve)
         if equity_df.empty:
